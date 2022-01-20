@@ -79,3 +79,11 @@ train_data, train_labels, test_data, test_labels = label_delineator(df_train, df
 Normalize the data sets
 '''
 train_data, test_data = data_normalizer(train_data, test_data)
+
+'''
+Creating the model
+'''
+length = train_data.shape[1]
+model = keras.Sequential()
+model.add(keras.layers.Dense(500, activation='relu', input_shape=[length,]))
+model.add(keras.layers.Dense(2, activation='softmax'))
