@@ -50,6 +50,18 @@ def data_normalizer(train_data, test_data):
     
     return train_data, test_data
 
+def predictor(model, test_data, test_labels, poke_index):
+    '''
+    The model predicts if the pokemon is actually a legendary or not
+    '''
+    prediction = model.predict(test_data)
+    prediction_value = np.argmax(prediction[poke_index])
+    if prediction_value == test_labels[poke_index]:
+        print(f'Correctly predicted to be a \"{test_labels[poke_index]}\"')
+    else:
+        print(f'Incorrectly predicted to be a \"{prediction_value}\"')
+        return prediction
+
 # formatting data needed for model
 df = df[['isLegendary','Generation', 'Type_1', 'Type_2', 'HP', 'Attack', 'Defense', 'Sp_Atk', 'Sp_Def', 'Speed','Color','Egg_Group_1','Height_m','Weight_kg','Body_Style']]
 df['isLegendary'] = df['isLegendary'].astype(int)
@@ -75,15 +87,22 @@ datasets into array with only its values
 '''
 train_data, train_labels, test_data, test_labels = label_delineator(df_train, df_test, 'isLegendary')
 
-'''
-Normalize the data sets
-'''
+# Normalize the data sets
 train_data, test_data = data_normalizer(train_data, test_data)
 
-'''
-Creating the model
-'''
+# Creating the model
 length = train_data.shape[1]
 model = keras.Sequential()
 model.add(keras.layers.Dense(500, activation='relu', input_shape=[length,]))
 model.add(keras.layers.Dense(2, activation='softmax'))
+
+# Compile and Fit the training data
+model.compile(optimizer='sgd', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+model.fit(train_data, train_labels, epochs=400)
+
+loss_value, accuracy_value = model.evaluate(test_data, test_labels)
+print(f'Test accuracy = {accuracy_value}')
+
+# predict
+poke_index = 149
+predictor(model, test_data, test_labels, poke_index)
